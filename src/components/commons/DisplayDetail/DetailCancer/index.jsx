@@ -66,6 +66,7 @@ import { AuthContext } from "../../../context/AuthContext";
 import { auth, db } from "../../../../database/firebaseConfigs";
 import { async } from "@firebase/util";
 import { isEmptyArray } from "formik";
+import SpinnerComponent from "../../Spinner";
 
 const DetailCancer = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -88,22 +89,21 @@ const DetailCancer = () => {
   useEffect(() => {
     fetchData();
     // return () => {
-    //   setFetchedList({});
+    //   setFetchedCancerList([]);
     // };
   }, []);
 
   //database
   const fetchData = async () => {
-    let cancerData = {};
+    let list = [];
     try {
-      // get all cancers
-      const guestDocSnap = await getDoc(
-        doc(db, "guests", "q6hUkmJo4Nq6Laaqtt5q")
-      );
-      if (guestDocSnap.exists()) {
-        cancerData = { ...guestDocSnap.data() };
-        setFetchedCancerList(cancerData["cancer data"]);
-      }
+      //get cancer data
+      const querySnapshot = await getDocs(collection(db, "cancers"));
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+
+      setFetchedCancerList(list);
     } catch (err) {
       console.log(err);
     }
@@ -143,7 +143,7 @@ const DetailCancer = () => {
     let list = [];
 
     fetchedCancerList.map((cancer) => {
-      if (cancer["name"].toLowerCase() === cancername) {
+      if (cancer["type"].toLowerCase() === cancername) {
         list = { ...cancer };
       }
     });
@@ -155,7 +155,10 @@ const DetailCancer = () => {
       <Table variant="striped" bg="blue.100" size="md">
         <Tbody>
           {Object.keys(list)
-            .filter((key) => key.toLowerCase() !== "name")
+            .filter(
+              (key) =>
+                key.toLowerCase() !== "type" && key.toLowerCase() !== "id"
+            )
             .map((key) => {
               return (
                 <React.Fragment key={key}>
@@ -185,26 +188,40 @@ const DetailCancer = () => {
     if (Array.isArray(firstAttributes)) {
       return firstAttributes.map((firstAttribute, index) => {
         return isObject(firstAttribute) ? (
-          Object.keys(firstAttribute).map((attribute) => {
-            if (Array.isArray(firstAttribute[`${attribute}`])) {
-              return firstAttribute[`${attribute}`].map((secondAttribute) => {
-                return (
-                  <Text fontSize="20px" lineHeight="2rem">
-                    - {secondAttribute.toString()}
-                  </Text>
+          Object.keys(firstAttribute)
+            .sort((a, b) => a.localeCompare(b))
+            .map((attribute, index) => {
+              if (Array.isArray(firstAttribute[`${attribute}`])) {
+                return firstAttribute[`${attribute}`].map(
+                  (secondAttribute, index) => {
+                    return (
+                      <Text key={index} fontSize="20px" lineHeight="2rem">
+                        - {secondAttribute.toString()}
+                      </Text>
+                    );
+                  }
                 );
-              });
-            } else {
-              return (
-                <Flex mb="10px" mt="10px" fontWeight={550} fontSize="20px">
-                  <Text mr="5px">{Capitalize(attribute)}: </Text>
-                  <Text>{firstAttribute[`${attribute}`]}</Text>
-                </Flex>
-              );
-            }
-          })
+              } else {
+                return (
+                  <Flex
+                    mb="10px"
+                    key={index}
+                    mt="10px"
+                    fontWeight={550}
+                    fontSize="20px"
+                  >
+                    <Text mr="5px" lineHeight="1.5rem">
+                      {Capitalize(attribute)}:{" "}
+                    </Text>
+                    <Text lineHeight="1.5rem">
+                      {Capitalize(firstAttribute[`${attribute}`])}
+                    </Text>
+                  </Flex>
+                );
+              }
+            })
         ) : (
-          <Text fontSize="20px" lineHeight="2rem">
+          <Text fontSize="20px" lineHeight="2rem" key={index}>
             - {Capitalize(firstAttribute.toString())}
           </Text>
         );
@@ -215,7 +232,7 @@ const DetailCancer = () => {
   };
 
   //main
-  return (
+  return !isEmptyArray(fetchedCancerList) ? (
     <Box p="0% 20%">
       <Box>
         <Text
@@ -233,6 +250,8 @@ const DetailCancer = () => {
 
       <Box m="0 5% 0 5%">{renderTableByList(getChosenDatalist())}</Box>
     </Box>
+  ) : (
+    <SpinnerComponent></SpinnerComponent>
   );
 };
 

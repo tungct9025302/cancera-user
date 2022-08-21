@@ -47,8 +47,8 @@ import SpinnerComponent from "../../../../commons/Spinner";
 
 const AddTreatment = () => {
   let properties = {
-    length: ["day(s)", "week(s)", "month(s)", "year(s)"],
-    treatments: [
+    length: ["", "day(s)", "week(s)", "month(s)", "year(s)"],
+    ["treatment types"]: [
       "",
       "Surgery",
       "Chemotherapy",
@@ -65,7 +65,7 @@ const AddTreatment = () => {
   const [date, setDate] = useState("");
   const [length, setLength] = useState("");
   const [cancer, setCancer] = useState("");
-  const [treatment, setTreatment] = useState("");
+  const [treatmentType, setTreatmentType] = useState("");
   const [duration, setDuration] = useState("" + length);
   const [note, setNote] = useState("");
 
@@ -206,8 +206,9 @@ const AddTreatment = () => {
       !isError(date, "date") &&
       !isInFuture(date) &&
       !isError(cancer, "cancer") &&
-      !isError(treatment, "treatment") &&
-      !isError(duration, "duration")
+      !isError(treatmentType, "treatment type") &&
+      !isError(duration, "duration") &&
+      !isError(length, "length")
     );
   };
 
@@ -227,7 +228,7 @@ const AddTreatment = () => {
 
   const isError = (value, attribute) => {
     switch (attribute) {
-      case "patient name":
+      case "name":
         return false;
       case "creator name":
         return false;
@@ -240,7 +241,7 @@ const AddTreatment = () => {
         }
         return false;
 
-      case "treatment":
+      case "treatment type":
         if (value === "") {
           return true;
         }
@@ -261,7 +262,7 @@ const AddTreatment = () => {
   };
   const findValue = (key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         return name;
       case "creator name":
         return fetchedList["name"];
@@ -271,8 +272,8 @@ const AddTreatment = () => {
         return length;
       case "date":
         return date;
-      case "treatment":
-        return treatment;
+      case "treatment type":
+        return treatmentType;
       case "duration":
         return duration;
       case "note":
@@ -283,7 +284,7 @@ const AddTreatment = () => {
   };
   const handleSet = (value, key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         break;
       case "creator name":
         break;
@@ -295,8 +296,8 @@ const AddTreatment = () => {
       case "date":
         setDate(value);
         break;
-      case "treatment":
-        setTreatment(value);
+      case "treatment type":
+        setTreatmentType(value);
         break;
       case "duration":
         setDuration(value);
@@ -309,7 +310,7 @@ const AddTreatment = () => {
     }
   };
   return fetchedList["role"] !== undefined ? (
-    <Flex direction="row" minH="78vh" w="100%" p="0 12% 5% 12%" h="max-content">
+    <Flex direction="row" minH="78vh" w="100%" p="0 12% 0% 12%" h="max-content">
       <DialogBox
         name={name}
         pid={pid}
@@ -349,7 +350,7 @@ const AddTreatment = () => {
                 <InputGroup>
                   <Input
                     readOnly={
-                      input["id"] === "patient name" ||
+                      input["id"] === "name" ||
                       input["id"] === "creator name" ||
                       input["id"] === "creator id"
                     }
@@ -429,6 +430,7 @@ const AddTreatment = () => {
             _focus={{ shadow: "" }}
             fontWeight="md"
             mt="20px"
+            style={!checkAllValid() ? { pointerEvents: "none" } : null}
           >
             Save
           </Button>

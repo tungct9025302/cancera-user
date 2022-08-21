@@ -31,7 +31,7 @@ const Footer = () => {
     switch (title) {
       case "Home":
         setClickedTitle("Home");
-        navigate("/home");
+        // navigate("/home");
         break;
       case "Address":
         setClickedTitle("Address");
@@ -100,6 +100,7 @@ const Footer = () => {
             {attributes.map((attribute, index) => {
               return (
                 <Flex
+                  key={index}
                   alignSelf="center"
                   cursor="pointer"
                   onClick={() => {

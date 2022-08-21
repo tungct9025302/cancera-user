@@ -184,6 +184,7 @@ const RenderLogin = ({
 
         switch (userData["role"]) {
           case "doctor":
+            onClose();
             fetchUserData(user);
             setError(false);
             dispatch({ type: "LOGIN", payload: user });
@@ -191,9 +192,10 @@ const RenderLogin = ({
             setLogged(true);
             setLoadingData(false);
             navigate("/my-appointments");
-            onClose();
+            window.location.reload();
             break;
           case "nurse":
+            onClose();
             fetchUserData(user);
             setError(false);
             dispatch({ type: "LOGIN", payload: user });
@@ -201,9 +203,10 @@ const RenderLogin = ({
             setLogged(true);
             setLoadingData(false);
             navigate("/my-patients");
-            onClose();
+            window.location.reload();
             break;
           case "patient":
+            onClose();
             fetchUserData(user);
             setError(false);
             dispatch({ type: "LOGIN", payload: user });
@@ -211,7 +214,8 @@ const RenderLogin = ({
             setLogged(true);
             setLoadingData(false);
             navigate("/view/my-appointments");
-            onClose();
+            window.location.reload();
+
             break;
           default:
             setError(false);

@@ -58,7 +58,7 @@ const ViewMyGeneralExaminations = () => {
 
   //use Location
   const location = useLocation();
-  const { boxTitle } = location.state;
+  // const { boxTitle } = location.state;
 
   useEffect(() => {
     fetchData();
@@ -244,13 +244,13 @@ const ViewMyGeneralExaminations = () => {
             <Flex direction="row">
               <Icon as={FaUserMd} w={4} h={4} m="2px 2px 0 0" />
               <Box maxW="500px">
-                Doctor: {generalExamination["doctor name"]}
+                Creator: {generalExamination["creator name"]}
               </Box>
             </Flex>
             <Flex direction="row" mt="5px">
-              <Text>Doctor ID:</Text>
+              <Text>Creator ID:</Text>
               <Text ml="1px" fontStyle="italic">
-                {generalExamination["doctor id"]}
+                {generalExamination["creator id"]}
               </Text>
             </Flex>
           </Flex>
@@ -261,7 +261,7 @@ const ViewMyGeneralExaminations = () => {
 
   const renderEndMessage = () => {
     let exist;
-    if (fetchedList !== undefined) {
+    if (fetchedList["general examinations"] !== undefined) {
       fetchedList["general examinations"].map((general_examination, index) => {
         if (general_examination["date"] === date) {
           exist = true;
@@ -285,7 +285,7 @@ const ViewMyGeneralExaminations = () => {
 
   return fetchedList["pid"] !== undefined ? (
     <Flex direction="row" w="100%" p="0 12%">
-      <DialogBox boxTitle="general examination" role={fetchedList["role"]} />
+      <DialogBox boxTitle="general examinations" role={fetchedList["role"]} />
 
       <Box minW="600px" w="100%" p="0 2% 0 2%">
         <Text
@@ -294,7 +294,7 @@ const ViewMyGeneralExaminations = () => {
           fontFamily="serif"
           fontWeight="550"
         >
-          My general examinations
+          My General Examinations
         </Text>
         <Flex direction="column" m="0 5% 0 5%">
           <Flex direction="row" mb="10px" align="center">

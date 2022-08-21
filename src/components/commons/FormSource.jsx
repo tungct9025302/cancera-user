@@ -46,6 +46,7 @@ export const createInputs = [
     placeholderForCreate: "Example: 123456",
   },
 ];
+
 export const changePasswordInputs = [
   {
     id: "old password",
@@ -76,9 +77,95 @@ export const changePasswordInputs = [
   },
 ];
 
+export const viewProfileInputsForUsers = [
+  {
+    id: "username",
+    label: "username",
+    type: "text",
+  },
+  {
+    id: "name",
+    label: "name",
+    type: "text",
+  },
+  {
+    id: "date of birth",
+    label: "date of birth",
+    type: "text",
+  },
+  {
+    id: "gender",
+    label: "gender",
+    type: "text",
+  },
+  {
+    id: "phone number",
+    label: "phone number",
+    type: "text",
+  },
+  {
+    id: "career",
+    label: "career",
+    type: "text",
+  },
+  {
+    id: "department",
+    label: "department",
+    type: "text",
+  },
+  {
+    id: "last login",
+    label: "last login",
+    type: "text",
+  },
+];
+
+export const viewProfileInputsForPatients = [
+  {
+    id: "username",
+    label: "username",
+    type: "text",
+  },
+  {
+    id: "name",
+    label: "name",
+    type: "text",
+  },
+  {
+    id: "date of birth",
+    label: "date of birth",
+    type: "text",
+  },
+  {
+    id: "gender",
+    label: "gender",
+    type: "text",
+  },
+  {
+    id: "phone number",
+    label: "phone number",
+    type: "text",
+  },
+  {
+    id: "career",
+    label: "career",
+    type: "text",
+  },
+  {
+    id: "cancer",
+    label: "cancer",
+    type: "text",
+  },
+  {
+    id: "last login",
+    label: "last login",
+    type: "text",
+  },
+];
+
 export const addPatientInputs = [
   {
-    id: "patient name",
+    id: "name",
     label: "Patient name",
     formType: "input",
     type: "text",
@@ -115,11 +202,11 @@ export const addPatientInputs = [
   },
   {
     id: "cancer",
-    label: "Cancer name",
+    label: "Cancer type",
     formType: "input",
     type: "text",
     placeholder: "",
-    noInputMessage: "Cancer name is required.",
+    noInputMessage: "Cancer type is required.",
     inWrongTimeMessage: "",
   },
   {
@@ -180,7 +267,7 @@ export const addPatientInputs = [
 
 export const appointmentInputs = [
   {
-    id: "patient name",
+    id: "name",
     label: "Patient name",
     formType: "input",
     type: "text",
@@ -264,7 +351,7 @@ export const appointmentInputs = [
 
 export const generalExaminationInputs = [
   {
-    id: "patient name",
+    id: "name",
     label: "Patient name",
     formType: "input",
     type: "text",
@@ -315,7 +402,7 @@ export const generalExaminationInputs = [
     id: "blood concentration",
     label: "Blood concentration",
     formType: "input",
-    type: "text",
+    type: "number",
     rightAddon: "g/dL",
     noInputMessage: "Blood concentration is required.",
     placeholder: "Example:20g/dL",
@@ -325,7 +412,7 @@ export const generalExaminationInputs = [
     id: "blood glucose",
     label: "Blood glucose",
     formType: "input",
-    type: "text",
+    type: "number",
     rightAddon: "mg/dL",
     noInputMessage: "Blood glucose is required.",
     placeholder: "Example:120mg/dL",
@@ -335,28 +422,17 @@ export const generalExaminationInputs = [
     id: "heart rate",
     label: "Heart rate",
     formType: "input",
-    type: "text",
+    type: "number",
     rightAddon: "bpm",
     noInputMessage: "Heart rate is required.",
     placeholder: "Example:100bpm.",
-    inWrongTimeMessage: "",
-  },
-  {
-    id: "note",
-    label: "Note",
-    formType: "input",
-    type: "text",
-    noInputMessage: "",
-    rightAddon: "",
-    placeholder:
-      "Note will help other staffs know what to achieve in this appointment.",
     inWrongTimeMessage: "",
   },
 ];
 
 export const treatmentInputs = [
   {
-    id: "patient name",
+    id: "name",
     label: "Patient name",
     formType: "input",
     type: "text",
@@ -392,11 +468,11 @@ export const treatmentInputs = [
     inWrongTimeMessage: `Treatment record date must be on ${x} or before.`,
   },
   {
-    id: "treatment",
-    label: "Treatment",
+    id: "treatment type",
+    label: "Treatment type",
     formType: "select",
     type: "",
-    noInputMessage: "Treatment is required",
+    noInputMessage: "Treatment type is required",
     placeholder: "",
     inWrongTimeMessage: "",
   },
@@ -407,16 +483,6 @@ export const treatmentInputs = [
     type: "number",
     noInputMessage: "Duration is required",
     placeholder: "",
-    inWrongTimeMessage: "",
-  },
-  {
-    id: "note",
-    label: "Note",
-    formType: "input",
-    type: "text",
-    noInputMessage: "",
-    placeholder:
-      "Note will help other staffs know what to achieve in this appointment.",
     inWrongTimeMessage: "",
   },
 ];

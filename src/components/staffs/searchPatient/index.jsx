@@ -56,13 +56,6 @@ const SearchPatient = () => {
       });
       setAllPatients(patientsData);
 
-      //get data if admin
-      const adminDocSnap = await getDoc(doc(db, "admins", currentUser.uid));
-      if (adminDocSnap.exists()) {
-        userData = { ...adminDocSnap.data() };
-        setFetchedList(userData);
-        setRole(userData["role"]);
-      }
       //get data if user
       const userDocSnap = await getDoc(doc(db, "users", currentUser.uid));
       if (userDocSnap.exists()) {
@@ -83,9 +76,7 @@ const SearchPatient = () => {
       if (searchWord.match(/^\d/)) {
         return value["pid"].toString().includes(searchWord);
       } else {
-        return value["patient name"]
-          .toLowerCase()
-          .includes(searchWord.toLowerCase());
+        return value["name"].toLowerCase().includes(searchWord.toLowerCase());
       }
     });
 
@@ -104,7 +95,7 @@ const SearchPatient = () => {
               key={index}
               display={
                 // listExistedAlphabet.includes(alphabet) &&
-                patient["patient name"].charAt(0).toLowerCase() === alphabet &&
+                patient["name"].charAt(0).toLowerCase() === alphabet &&
                 !listExistedPatients.includes(patient["pid"])
                   ? "inline-block"
                   : "none"
@@ -152,9 +143,9 @@ const SearchPatient = () => {
   };
 
   const renderPatientByAlphabet = (patient, alphabet) => {
-    if (patient["patient name"].charAt(0).toLowerCase() === alphabet) {
+    if (patient["name"].charAt(0).toLowerCase() === alphabet) {
       listExistedPatients.push(patient["pid"]);
-      return patient["patient name"];
+      return patient["name"];
     }
   };
 

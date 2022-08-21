@@ -47,7 +47,7 @@ import { isEmptyArray } from "formik";
 import SpinnerComponent from "../../commons/Spinner";
 
 const MyPatient = () => {
-  const [cancer, setCancer] = useState("");
+  const [filterName, setFilterName] = useState("");
   const [existedInList, setExistedInList] = useState(false);
   const [myPatients, setMyPatients] = useState([]);
   const [deletedPatient, setDeletedPatient] = useState();
@@ -165,8 +165,8 @@ const MyPatient = () => {
               list?
             </Text>
             <Text>
-              Deleted patient can not be recovered and you have to manually add
-              the patient back.
+              Deleted patient can only be added back to your patient list by
+              adding in search patient.
             </Text>
           </AlertDialogBody>
 
@@ -191,18 +191,11 @@ const MyPatient = () => {
   };
 
   const renderFilteredPatientList = () => {
-    //  return allPatients.map((patient, index) => {
-    //       return myPatients.map((myPatient, index) => {
-    //         if (patient["pid"] === myPatient["pid"]) {
-    //           return <Box key={index}>{renderData(patient)}</Box>;
-    //         }
-    //       });
-    //     });
-
     return allPatients
-      .filter(
-        (filteredCancer) =>
-          filteredCancer["cancer"].toLowerCase() === cancer.toLowerCase()
+      .filter((filteredPatients) =>
+        filteredPatients["name"]
+          .toLowerCase()
+          .includes(filterName.toLowerCase())
       )
       .map((patient, index) => {
         return myPatients.map((myPatient, index) => {
@@ -244,7 +237,7 @@ const MyPatient = () => {
             <Box display="flex" direction="row" mb="10px">
               <Box display="flex" alignItems="baseline" w="340px">
                 <Badge borderRadius="full" px="2">
-                  {patient["patient name"]}
+                  {patient["name"]}
                 </Badge>
               </Box>
               <Box
@@ -331,20 +324,21 @@ const MyPatient = () => {
         <Flex direction="column" m="0 5% 0 5%">
           <Flex direction="row" mb="10px" align="center">
             <Text fontWeight="600" mr="5px" whiteSpace="nowrap">
-              Search by cancer:
+              Search by name:
             </Text>
             <FormControl w="160px">
-              <Select
-                id="cancer"
-                placeholder="Select cancer"
+              <Input
+                pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
+                type="text"
+                value={filterName}
                 onChange={(e) => {
-                  setCancer(e.target.value);
+                  setFilterName(e.target.value);
                 }}
-              >
-                {properties["cancerList"].map((attribute, index) => {
-                  return <option key={index}>{attribute}</option>;
-                })}
-              </Select>
+                _placeholder={{
+                  fontSize: "15px",
+                }}
+                placeholder="Nguyen Van A"
+              />
             </FormControl>
           </Flex>
 
@@ -359,7 +353,7 @@ const MyPatient = () => {
               </Text>
             }
           >
-            {cancer === ""
+            {filterName === ""
               ? renderAllPatientList()
               : renderFilteredPatientList()}
           </InfiniteScroll>

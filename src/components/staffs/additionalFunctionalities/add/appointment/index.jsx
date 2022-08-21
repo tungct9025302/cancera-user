@@ -120,7 +120,7 @@ const AddAppointment = () => {
           appointments: [{ ...data }],
         });
 
-        navigate(`/search-patient/id=${pid}/check-history/appointment`, {
+        navigate(`/search-patient/id=${pid}/check-history/appointments`, {
           state: { boxTitle: boxTitle, name: name, pid: pid },
         });
       } else {
@@ -228,7 +228,7 @@ const AddAppointment = () => {
 
   const isError = (value, attribute) => {
     switch (attribute) {
-      case "patient name":
+      case "name":
         return false;
       case "doctor name":
         return false;
@@ -279,7 +279,7 @@ const AddAppointment = () => {
   };
   const findValue = (key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         return name;
       case "doctor name":
         return fetchedList["name"];
@@ -305,7 +305,7 @@ const AddAppointment = () => {
   };
   const handleSet = (value, key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         break;
       case "doctor name":
         break;
@@ -337,7 +337,7 @@ const AddAppointment = () => {
     }
   };
   return fetchedList["role"] !== undefined ? (
-    <Flex direction="row" minH="78vh" w="100%" p="0 12% 5% 12%" h="max-content">
+    <Flex direction="row" minH="78vh" w="100%" p="0 12% 0% 12%" h="max-content">
       <DialogBox
         name={name}
         pid={pid}
@@ -377,7 +377,7 @@ const AddAppointment = () => {
                 <FormLabel>{input["label"]}</FormLabel>
                 <Input
                   readOnly={
-                    input["id"] === "patient name" ||
+                    input["id"] === "name" ||
                     input["id"] === "doctor name" ||
                     input["id"] === "doctor id"
                   }

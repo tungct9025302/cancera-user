@@ -8,14 +8,17 @@ import DetailIndicator from "../components/commons/DisplayDetail/DetailIndicator
 import DetailCancer from "../components/commons/DisplayDetail/DetailCancer";
 import DetailTreatment from "../components/commons/DisplayDetail/DetailTreatment";
 
-//Doctor&Nurse
+//Staff
 import Check from "../components/staffs/additionalFunctionalities/check";
 import Add from "../components/staffs/additionalFunctionalities/add";
 import Modify from "../components/staffs/additionalFunctionalities/modify";
 import SearchPatient from "../components/staffs/searchPatient";
-import MyAppointment from "../components/staffs/doctorOnly/myAppointment";
 import MyPatient from "../components/staffs/myPatient";
 import DetailPatient from "../components/commons/DisplayDetail/DetailPatient";
+import MyGeneralExaminations from "../components/staffs/myGeneralExaminations";
+
+//Doctor Only
+import MyAppointments from "../components/staffs/doctorOnly/myAppointments";
 
 //Patient
 import ViewMyTreatments from "../components/patient/view/treatments";
@@ -72,11 +75,6 @@ export const firstGuestHeaderConfigs = [
 //Doctors
 export const secondDoctorHeaderConfigs = [
   {
-    label: "HOME",
-    path: "/home",
-    color: "#4a4a4a",
-  },
-  {
     label: "MY PATIENTS",
     path: "/my-patients",
     color: "#4a4a4a",
@@ -84,6 +82,11 @@ export const secondDoctorHeaderConfigs = [
   {
     label: "MY APPOINTMENTS",
     path: "/my-appointments",
+    color: "#4a4a4a",
+  },
+  {
+    label: "MY GENERAL EXAMINATIONS",
+    path: "/my-general-examinations",
     color: "#4a4a4a",
   },
   {
@@ -119,13 +122,13 @@ export const firstDoctorHeaderConfigs = [
 //Nurses
 export const secondNurseHeaderConfigs = [
   {
-    label: "HOME",
-    path: "/home",
+    label: "MY PATIENTS",
+    path: "/my-patients",
     color: "#4a4a4a",
   },
   {
-    label: "MY PATIENTS",
-    path: "/my-patients",
+    label: "MY GENERAL EXAMINATIONS",
+    path: "/my-general-examinations",
     color: "#4a4a4a",
   },
   {
@@ -220,7 +223,7 @@ export const routeConfigs = [
 
   {
     path: "/my-appointments",
-    element: <MyAppointment />,
+    element: <MyAppointments />,
   },
 
   //Nurse and Doctor
@@ -232,7 +235,6 @@ export const routeConfigs = [
     path: "/search-patient/id=:pid/check-history/:type",
     element: <Check />,
   },
-
   {
     path: "/search-patient/id=:pid/add/:boxType",
     element: <Add />,
@@ -252,6 +254,10 @@ export const routeConfigs = [
   {
     path: "/add-patient",
     element: <AddPatient />,
+  },
+  {
+    path: "/my-general-examinations",
+    element: <MyGeneralExaminations />,
   },
   //Guest
   {

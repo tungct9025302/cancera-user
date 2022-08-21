@@ -3,7 +3,6 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 
 import ModifyAppointment from "./appointment";
-
 import ModifyGeneralExamination from "./general_examination";
 import ModifyTreatment from "./treatment";
 

@@ -43,14 +43,15 @@ import DialogBox from "../../../../commons/DialogBox";
 import { auth, db } from "../../../../../database/firebaseConfigs";
 import { AuthContext } from "../../../../context/AuthContext";
 import { generalExaminationInputs } from "../../../../commons/FormSource";
+import SpinnerComponent from "../../../../commons/Spinner";
 
 const ModifyGeneralExamination = () => {
   let properties = {};
   const navigate = useNavigate();
   const location = useLocation();
-  const { name, id, pid, boxTitle } = location.state;
+  const { name, id, pid, boxTitle, previous_location } = location.state;
 
-  const [currentPatient, setCurrentPatient] = useState({});
+  const [currentPatient, setCurrentPatient] = useState();
   const [allPatients, setAllPatients] = useState([]);
   const [fetchedList, setFetchedList] = useState([]);
   const [data, setData] = useState({});
@@ -66,24 +67,22 @@ const ModifyGeneralExamination = () => {
   useEffect(() => {
     fetchData();
     return () => {
-      setCurrentPatient({});
+      setCurrentPatient();
       setFetchedList([]);
     };
   }, []);
 
   //database
   const fetchData = async () => {
-    let patientData,
-      userData = [];
+    let patientsData = [];
+    let userData = [];
     try {
       //get all patients
-      const allPatientsDocSnap = await getDoc(
-        doc(db, "patients", "j1g1lxEY9vBDbk2PrQiy")
-      );
-      if (allPatientsDocSnap.exists()) {
-        patientData = { ...allPatientsDocSnap.data() };
-        setAllPatients(patientData["allPatients"]);
-      }
+      const querySnapshot = await getDocs(collection(db, "patients"));
+      querySnapshot.forEach((doc) => {
+        patientsData.push({ id: doc.id, ...doc.data() });
+      });
+      setAllPatients(patientsData);
 
       //get user data
       const userDocSnap = await getDoc(doc(db, "users", currentUser.uid));
@@ -93,39 +92,35 @@ const ModifyGeneralExamination = () => {
       }
 
       //set current patient
-      if (!isEmptyArray(patientData)) {
-        for (let i = 0; i < patientData["allPatients"].length; i++) {
+      if (!isEmptyArray(patientsData)) {
+        for (let i = 0; i < patientsData.length; i++) {
           if (
-            (pid === patientData["allPatients"][i].pid && pid !== undefined) ||
-            patientData["allPatients"][i].pid === pid
+            (pid === patientsData[i].pid && pid !== undefined) ||
+            patientsData[i].pid === pid
           ) {
-            setCurrentPatient(patientData["allPatients"][i]);
+            setCurrentPatient(patientsData[i]);
           }
         }
       }
 
-      if (!isEmptyArray(patientData["allPatients"])) {
-        for (let i = 0; i < patientData["allPatients"].length; i++) {
-          if (pid === patientData["allPatients"][i].pid && pid !== undefined) {
-            setCurrentPatient(patientData["allPatients"][i]);
-            patientData["allPatients"][i]["general examinations"].map(
+      if (!isEmptyArray(patientsData)) {
+        for (let i = 0; i < patientsData.length; i++) {
+          if (pid === patientsData[i].pid && pid !== undefined) {
+            setCurrentPatient(patientsData[i]);
+            patientsData[i]["general examinations"].map(
               (generalExamination, index) => {
-                // let note =
-                //   generalExamination["note"] !== undefined
-                //     ? generalExamination["note"]
-                //     : "";
-
                 if (id === index) {
                   setDisplayInfo(generalExamination);
                   setInitializeData(generalExamination);
                   setData({
+                    ["creator name"]: userData["name"],
+                    ["creator id"]: userData["id"],
                     date: generalExamination["date"],
                     ["blood pressure"]: generalExamination["blood pressure"],
                     ["blood glucose"]: generalExamination["blood glucose"],
                     ["blood concentration"]:
                       generalExamination["blood concentration"],
                     ["heart rate"]: generalExamination["heart rate"],
-                    note: generalExamination["note"],
                   });
                 }
               }
@@ -140,6 +135,12 @@ const ModifyGeneralExamination = () => {
 
   const setInitializeData = (generalExamination) => {
     let list = {};
+    if (generalExamination["creator id"] !== undefined) {
+      list = { ...list, date: generalExamination["creator id"] };
+    }
+    if (generalExamination["creator name"] !== undefined) {
+      list = { ...list, date: generalExamination["creator name"] };
+    }
     if (generalExamination["date"] !== undefined) {
       list = { ...list, date: generalExamination["date"] };
     }
@@ -167,12 +168,7 @@ const ModifyGeneralExamination = () => {
         ["heart rate"]: generalExamination["heart rate"],
       };
     }
-    if (generalExamination["note"] !== undefined) {
-      list = {
-        ...list,
-        ["note"]: generalExamination["note"],
-      };
-    }
+
     setData(list);
   };
 
@@ -182,41 +178,17 @@ const ModifyGeneralExamination = () => {
     setBloodConcentration(data["blood concentration"].match(/\d/g).join(""));
     setBloodPressure(data["blood pressure"].match(/[\d/]/g).join(""));
     setHeartRate(data["heart rate"].match(/\d/g).join(""));
-
-    if (data["note"] !== undefined) {
-      setNote(data["note"]);
-    } else {
-      data["note"] = "";
-      setNote(data["note"]);
-    }
   };
 
   const handleModify = async (e) => {
     e.preventDefault();
 
-    let newAllPatients = [];
-
-    allPatients.map((patient) => {
-      if (patient["pid"] === pid) {
-        if (
-          patient["general examinations"] !== undefined ||
-          !isEmptyArray(patient["general examinations"])
-        ) {
-          let newGeneralExaminations = [];
-          patient["general examinations"].map((generalExamination, index) => {
-            if (index === id) {
-              generalExamination = { ...data };
-            }
-            newGeneralExaminations.push(generalExamination);
-          });
-
-          patient = {
-            ...patient,
-            ["general examinations"]: newGeneralExaminations,
-          };
-        }
+    let newGeneralExaminations = [];
+    currentPatient["general examinations"].map((generalExamination, index) => {
+      if (index === id) {
+        generalExamination = { ...data };
       }
-      newAllPatients.push(patient);
+      newGeneralExaminations.push(generalExamination);
     });
 
     try {
@@ -224,15 +196,21 @@ const ModifyGeneralExamination = () => {
         currentPatient["general examinations"] !== undefined &&
         !isEmptyArray(currentPatient["general examinations"])
       ) {
-        await setDoc(doc(db, "patients", "j1g1lxEY9vBDbk2PrQiy"), {
-          allPatients: newAllPatients,
+        await updateDoc(doc(db, "patients", currentPatient["id"]), {
+          ["general examinations"]: newGeneralExaminations,
         });
-        navigate(
-          `/search-patient/id=${pid}/check-history/general examination`,
-          {
-            state: { boxTitle: boxTitle, name: name, pid: pid },
-          }
-        );
+        if (previous_location === "my general examinations") {
+          navigate(`/my-general-examinations`, {
+            state: { boxTitle: boxTitle },
+          });
+        } else {
+          navigate(
+            `/search-patient/id=${pid}/check-history/general examination`,
+            {
+              state: { boxTitle: boxTitle, name: name, pid: pid },
+            }
+          );
+        }
       } else {
         alert("This general examination record is no longer existed.");
         window.location.reload();
@@ -315,7 +293,11 @@ const ModifyGeneralExamination = () => {
 
   const isError = (value, attribute) => {
     switch (attribute) {
-      case "patient name":
+      case "name":
+        return false;
+      case "creator name":
+        return false;
+      case "creator id":
         return false;
 
       case "date":
@@ -354,8 +336,12 @@ const ModifyGeneralExamination = () => {
   };
   const findValue = (key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         return name;
+      case "creator name":
+        return fetchedList["name"];
+      case "creator id":
+        return fetchedList["id"];
       case "date":
         return date;
       case "blood pressure":
@@ -374,7 +360,11 @@ const ModifyGeneralExamination = () => {
   };
   const handleSet = (value, key) => {
     switch (key) {
-      case "patient name":
+      case "name":
+        break;
+      case "creator name":
+        break;
+      case "creator id":
         break;
       case "date":
         setDate(value);
@@ -398,7 +388,7 @@ const ModifyGeneralExamination = () => {
         break;
     }
   };
-  return (
+  return fetchedList["name"] !== undefined ? (
     <Flex direction="row" minH="78vh" w="100%" p="0 12% 5% 12%" h="max-content">
       <DialogBox
         name={name}
@@ -438,7 +428,11 @@ const ModifyGeneralExamination = () => {
                 <FormLabel>{input["label"]}</FormLabel>
                 <InputGroup size="md">
                   <Input
-                    readOnly={input["id"] === "patient name"}
+                    readOnly={
+                      input["id"] === "name" ||
+                      input["id"] === "creator name" ||
+                      input["id"] === "creator id"
+                    }
                     type={input["type"]}
                     value={findValue(input["id"])}
                     onChange={(e) => {
@@ -511,6 +505,8 @@ const ModifyGeneralExamination = () => {
       </Box>
       <Box minW="18%"></Box>
     </Flex>
+  ) : (
+    <SpinnerComponent></SpinnerComponent>
   );
 };
 

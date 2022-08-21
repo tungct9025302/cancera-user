@@ -56,7 +56,7 @@ const ViewMyAppointments = () => {
 
   //use Location
   const location = useLocation();
-  const { boxTitle } = location.state;
+  // const { boxTitle } = location.state;
 
   useEffect(() => {
     fetchData();
@@ -230,7 +230,7 @@ const ViewMyAppointments = () => {
 
   const renderEndMessage = () => {
     let exist;
-    if (fetchedList !== undefined) {
+    if (fetchedList["appointments"] !== undefined) {
       fetchedList["appointments"].map((appointment, index) => {
         if (appointment["date"] === date) {
           exist = true;
@@ -254,7 +254,7 @@ const ViewMyAppointments = () => {
 
   return fetchedList["pid"] !== undefined ? (
     <Flex direction="row" w="100%" p="0 12%">
-      <DialogBox boxTitle="appointment" role={fetchedList["role"]} />
+      <DialogBox boxTitle="appointments" role={fetchedList["role"]} />
 
       <Box minW="600px" w="100%" p="0 2% 0 2%">
         <Text

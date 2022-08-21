@@ -99,16 +99,15 @@ const DetailTreatment = () => {
 
   //database
   const fetchData = async () => {
-    let guestData = {};
+    let list = [];
     try {
-      // get all treatments
-      const guestDocSnap = await getDoc(
-        doc(db, "guests", "q6hUkmJo4Nq6Laaqtt5q")
-      );
-      if (guestDocSnap.exists()) {
-        guestData = { ...guestDocSnap.data() };
-        setFetchedTreatmentList(guestData["treatment data"]);
-      }
+      //get cancer data
+      const querySnapshot = await getDocs(collection(db, "treatments"));
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+
+      setFetchedTreatmentList(list);
     } catch (err) {
       console.log(err);
     }
@@ -174,7 +173,7 @@ const DetailTreatment = () => {
     let list = [];
 
     fetchedTreatmentList.map((treatment) => {
-      if (treatment["name"].toLowerCase() === treatmentname) {
+      if (treatment["type"].toLowerCase() === treatmentname) {
         list = { ...treatment };
       }
     });
@@ -186,7 +185,10 @@ const DetailTreatment = () => {
       <Table variant="striped" bg="blue.100" size="md">
         <Tbody>
           {Object.keys(list)
-            .filter((key) => key.toLowerCase() !== "name")
+            .filter(
+              (key) =>
+                key.toLowerCase() !== "type" && key.toLowerCase() !== "id"
+            )
             .map((key) => {
               return (
                 <React.Fragment key={key}>
@@ -245,7 +247,7 @@ const DetailTreatment = () => {
     } else {
       return (
         <Text fontSize="20px" lineHeight="2rem">
-          - {Capitalize(firstAttributes.toString())}
+          {Capitalize(firstAttributes.toString())}
         </Text>
       );
     }

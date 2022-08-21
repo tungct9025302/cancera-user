@@ -176,7 +176,7 @@ const AddPatient = () => {
   }
   const checkAllValid = () => {
     return (
-      !isError(patientName, "patient name") &&
+      !isError(patientName, "name") &&
       !isInvalidInput(dateOfBirth, "date of birth") &&
       !isInvalidInput(nextAppointment, "next appointment") &&
       !isInvalidInput(
@@ -194,7 +194,7 @@ const AddPatient = () => {
   const isError = (value, attribute) => {
     let isnum = /^\d+$/.test(value);
     switch (attribute) {
-      case "patient name":
+      case "name":
         if (value === "") {
           return true;
         }
@@ -236,7 +236,7 @@ const AddPatient = () => {
     let x = new Date().toISOString().slice(0, 10);
     let y = value;
     switch (attribute) {
-      case "patient name":
+      case "name":
         return patientName.match(/\d+/g);
       case "last general examination date":
         return y > x;
@@ -256,7 +256,7 @@ const AddPatient = () => {
 
   const findValue = (key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         return patientName;
       case "date of birth":
         return dateOfBirth;
@@ -284,7 +284,7 @@ const AddPatient = () => {
   };
   const handleSet = (value, key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         setPatientName(value);
         break;
       case "date of birth":

@@ -58,17 +58,15 @@ const Indicator = () => {
 
   //database
   const fetchData = async () => {
-    let list = {};
-
+    let list = [];
     try {
       //get cancer data
-      const cancerDocSnap = await getDoc(
-        doc(db, "guests", "q6hUkmJo4Nq6Laaqtt5q")
-      );
-      if (cancerDocSnap.exists()) {
-        list = { ...cancerDocSnap.data() };
-        setFetchedCancerList(list["cancer data"]);
-      }
+      const querySnapshot = await getDocs(collection(db, "cancers"));
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+
+      setFetchedCancerList(list);
     } catch (err) {
       console.log(err);
     }
@@ -147,7 +145,7 @@ const Indicator = () => {
               {renderBoxData(
                 cancer["behavior indicators"],
                 alphabet,
-                cancer["name"],
+                cancer["type"],
                 "behavior indicators"
               )}
             </Box>
@@ -158,7 +156,7 @@ const Indicator = () => {
               {renderBoxData(
                 cancer["external indicators"],
                 alphabet,
-                cancer["name"],
+                cancer["type"],
                 "external indicators"
               )}
             </Box>

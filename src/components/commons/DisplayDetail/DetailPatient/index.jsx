@@ -178,7 +178,7 @@ const DetailPatient = () => {
           ["my patients"]: [
             {
               pid: currentPatient["pid"],
-              ["patient name"]: currentPatient["patient name"],
+              ["name"]: currentPatient["name"],
             },
           ],
         });
@@ -191,7 +191,7 @@ const DetailPatient = () => {
               ...fetchedList["my patients"],
               {
                 pid: currentPatient["pid"],
-                ["patient name"]: currentPatient["patient name"],
+                ["name"]: currentPatient["name"],
               },
             ],
           });
@@ -332,13 +332,12 @@ const DetailPatient = () => {
           {Object.keys(currentPatient)
             .filter(
               (key) =>
-                key.toLowerCase() !== "patient name" &&
+                key.toLowerCase() !== "name" &&
                 key.toLowerCase() !== "id" &&
                 key.toLowerCase() !== "password" &&
-                // key.toLowerCase() !== "appointments" &&
-                // key.toLowerCase() !== "general examinations" &&
-                // key.toLowerCase() !== "treatments" &&
-                key.toLowerCase() !== "create time"
+                key.toLowerCase() !== "role" &&
+                key.toLowerCase() !== "create time" &&
+                key.toLowerCase() !== "last login"
             )
             .map((key) => {
               return (
@@ -373,26 +372,29 @@ const DetailPatient = () => {
             key={index}
             mb={index + 1 === firstAttributes.length ? "0px" : "40px"}
           >
-            {Object.keys(firstAttribute).map((attribute, index) => {
-              if (Array.isArray(firstAttribute[`${attribute}`])) {
-                return firstAttribute[`${attribute}`].map(
-                  (secondAttribute, index) => {
-                    return (
-                      <Text key={index} fontSize="20px" lineHeight="2rem">
-                        {secondAttribute.toString()}
-                      </Text>
-                    );
-                  }
-                );
-              } else {
-                return (
-                  <Flex key={index} mb="10px" mt="10px" fontSize="20px">
-                    <Text mr="5px">{Capitalize(attribute)}: </Text>
-                    <Text>{firstAttribute[`${attribute}`]}</Text>
-                  </Flex>
-                );
-              }
-            })}
+            {Object.keys(firstAttribute)
+              .sort((a, b) => a.localeCompare(b))
+              .map((attribute, index) => {
+                if (Array.isArray(firstAttribute[`${attribute}`])) {
+                  return firstAttribute[`${attribute}`].map(
+                    (secondAttribute, index) => {
+                      return (
+                        <Text key={index} fontSize="20px" lineHeight="2rem">
+                          {secondAttribute.toString()}
+                        </Text>
+                      );
+                    }
+                  );
+                } else {
+                  console.log(attribute);
+                  return (
+                    <Flex key={index} mb="10px" mt="10px" fontSize="20px">
+                      <Text mr="5px">{Capitalize(attribute)}: </Text>
+                      <Text>{firstAttribute[`${attribute}`]}</Text>
+                    </Flex>
+                  );
+                }
+              })}
           </Box>
         ) : (
           <Text key={index} fontSize="20px" lineHeight="2rem">
@@ -513,7 +515,7 @@ const DetailPatient = () => {
   return fetchedList["role"] !== undefined ? (
     <Flex direction="row" w="100%" p="0 12% 0% 12%" h="max-content">
       <DialogBox
-        name={currentPatient["patient name"]}
+        name={currentPatient["name"]}
         pid={pid}
         role={fetchedList["role"]}
       />
@@ -521,7 +523,7 @@ const DetailPatient = () => {
       <Box minW="600px" w="100%" p="0 2% 0% 2%" h="fit-content">
         <Flex direction="row" padding="1rem 5rem 1rem 3rem" align="center">
           <Text fontSize="5xl" fontFamily="serif" fontWeight="550" mr="1rem">
-            {currentPatient["patient name"]}
+            {currentPatient["name"]}
           </Text>
 
           {/* add/remove from my patient icons */}

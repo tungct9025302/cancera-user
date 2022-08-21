@@ -93,16 +93,15 @@ const DetailIndicator = () => {
 
   //database
   const fetchData = async () => {
-    let cancerData = {};
+    let list = [];
     try {
-      //get all cancers
-      const guestDocSnap = await getDoc(
-        doc(db, "guests", "q6hUkmJo4Nq6Laaqtt5q")
-      );
-      if (guestDocSnap.exists()) {
-        cancerData = { ...guestDocSnap.data() };
-        setFetchedCancerList(cancerData["cancer data"]);
-      }
+      //get cancer data
+      const querySnapshot = await getDocs(collection(db, "cancers"));
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+
+      setFetchedCancerList(list);
     } catch (err) {
       console.log(err);
     }
@@ -175,13 +174,13 @@ const DetailIndicator = () => {
         return (
           <ListItem key={index} w="fit-content">
             <Link
-              to={`/search/cancer/${cancer["name"].toLowerCase()}`}
+              to={`/search/cancer/${cancer["type"].toLowerCase()}`}
               state={{ dataType: "CancerData", id: cancer["id"] }}
             >
               <Flex direction="row">
                 <ChevronRightIcon w={7} h={7} mt="8px"></ChevronRightIcon>
                 <Text fontSize="3xl" fontWeight={400}>
-                  {Capitalize(cancer["name"])}
+                  {Capitalize(cancer["type"])}
                 </Text>
               </Flex>
             </Link>

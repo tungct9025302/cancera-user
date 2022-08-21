@@ -80,13 +80,14 @@ const App = () => {
         overflow="auto"
       >
         <Header position="absolute" />
-        <Box minH="70vh" pb="56px">
+        <Box minH="70vh" pb="50px">
           <Routes>{renderRoutes()}</Routes>
         </Box>
         <Footer />
       </Box>
     </BrowserRouter>
   );
+  x;
 };
 
 export default App;

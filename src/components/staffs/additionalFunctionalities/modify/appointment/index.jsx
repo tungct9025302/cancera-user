@@ -46,12 +46,12 @@ import SpinnerComponent from "../../../../commons/Spinner";
 const ModifyAppointment = () => {
   const navigate = useNavigate();
   const [allPatients, setAllPatients] = useState([]);
-  const [currentPatient, setCurrentPatient] = useState({});
+  const [currentPatient, setCurrentPatient] = useState();
   const [fetchedList, setFetchedList] = useState([]);
   const [data, setData] = useState({});
   const { currentUser } = useContext(AuthContext);
   const location = useLocation();
-  const { name, id, pid, boxTitle } = location.state;
+  const { name, id, pid, boxTitle, previous_location } = location.state;
 
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
@@ -59,6 +59,8 @@ const ModifyAppointment = () => {
   const [floor, setFloor] = useState("");
   const [time, setTime] = useState("");
   const [cancer, setCancer] = useState("");
+  const [doctorName, setDoctorName] = useState("");
+  const [doctorId, setDoctorId] = useState("");
 
   let properties = {
     rooms: ["", 217, 212, 222],
@@ -69,7 +71,7 @@ const ModifyAppointment = () => {
   useEffect(() => {
     fetchData();
     return () => {
-      setCurrentPatient({});
+      setCurrentPatient();
       setFetchedList([]);
       setAllPatients([]);
       setData({});
@@ -93,10 +95,6 @@ const ModifyAppointment = () => {
       if (userDocSnap.exists()) {
         userData = { ...userDocSnap.data() };
         setFetchedList(userData);
-        setData({
-          ["doctor name"]: userData["name"],
-          ["doctor id"]: +userData["id"],
-        });
       }
 
       //set current patient
@@ -120,6 +118,16 @@ const ModifyAppointment = () => {
               if (id === index) {
                 setDisplayInfo(appointment);
                 setInitializeData(appointment);
+                setData({
+                  cancer: appointment["cancer"],
+                  date: appointment["date"],
+                  ["doctor id"]: userData["id"],
+                  ["doctor name"]: userData["name"],
+                  floor: appointment["floor"],
+                  room: appointment["room"],
+                  time: appointment["time"],
+                  title: appointment["title"],
+                });
               }
             });
           }
@@ -134,10 +142,10 @@ const ModifyAppointment = () => {
     let list = {};
 
     if (appointment["doctor name"] !== undefined) {
-      list = { ...list, date: appointment["date"] };
+      list = { ...list, ["doctor name"]: fetchedList["name"] };
     }
     if (appointment["doctor id"] !== undefined) {
-      list = { ...list, date: appointment["date"] };
+      list = { ...list, ["doctor id"]: fetchedList["id"] };
     }
     if (appointment["date"] !== undefined) {
       list = { ...list, date: appointment["date"] };
@@ -192,14 +200,18 @@ const ModifyAppointment = () => {
         currentPatient["appointments"] !== undefined &&
         !isEmptyArray(currentPatient["appointments"])
       ) {
-        await setDoc(doc(db, "patients", currentPatient["id"]), {
-          ...currentPatient,
+        await updateDoc(doc(db, "patients", currentPatient["id"]), {
           appointments: newAppointments,
         });
-
-        navigate(`/search-patient/id=${pid}/check-history/appointment`, {
-          state: { boxTitle: boxTitle, name: name, pid: pid },
-        });
+        if (previous_location === "my appointments") {
+          navigate(`/my-appointments`, {
+            state: { boxTitle: boxTitle },
+          });
+        } else {
+          navigate(`/search-patient/id=${pid}/check-history/appointments`, {
+            state: { boxTitle: boxTitle, name: name, pid: pid },
+          });
+        }
       } else {
         alert("This appointment is no longer existed.");
         window.location.reload();
@@ -295,7 +307,7 @@ const ModifyAppointment = () => {
 
   const isError = (value, attribute) => {
     switch (attribute) {
-      case "patient name":
+      case "name":
         return false;
       case "doctor name":
         return false;
@@ -346,7 +358,7 @@ const ModifyAppointment = () => {
   };
   const findValue = (key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         return name;
       case "doctor name":
         return fetchedList["name"];
@@ -371,7 +383,7 @@ const ModifyAppointment = () => {
   };
   const handleSet = (value, key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         break;
       case "doctor name":
         break;
@@ -400,7 +412,7 @@ const ModifyAppointment = () => {
     }
   };
 
-  return currentPatient["pid"] !== undefined ? (
+  return fetchedList["name"] !== undefined ? (
     <Flex direction="row" minH="78vh" w="100%" p="0 12% 5% 12%" h="max-content">
       <DialogBox
         name={name}
@@ -441,7 +453,7 @@ const ModifyAppointment = () => {
                 <FormLabel>{input["label"]}</FormLabel>
                 <Input
                   readOnly={
-                    input["id"] === "patient name" ||
+                    input["id"] === "name" ||
                     input["id"] === "doctor name" ||
                     input["id"] === "doctor id"
                   }

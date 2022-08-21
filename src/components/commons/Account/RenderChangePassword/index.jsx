@@ -1,4 +1,4 @@
-import React, { Component, useState, useContext } from "react";
+import React, { Component, useState, useContext, useEffect } from "react";
 import {
   Text,
   HStack,
@@ -43,6 +43,7 @@ import {
   where,
   getDocs,
   connectFirestoreEmulator,
+  updateDoc,
 } from "firebase/firestore";
 import { auth, db } from "../../../../database/firebaseConfigs";
 import { async } from "@firebase/util";
@@ -56,29 +57,55 @@ const RenderChangePassword = ({
   onClose,
   isOpen,
   dispatch,
-  fetchUserData,
   setLogged,
-  logged,
   setPassword,
   setUsername,
-  username,
-  password,
   setData,
   data,
   error,
   setError,
-  setLoadingData,
   loadingData,
-  role,
   setRole,
   remember,
-  setRemember,
 }) => {
   const navigate = useNavigate();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const { currentUser } = useContext(AuthContext);
+  const [fetchedList, setFetchedList] = useState([]);
+  useEffect(() => {
+    fetchUserData(currentUser);
+
+    return () => {
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    };
+  }, []);
+
+  //database
+  const fetchUserData = async (user) => {
+    let userData = [];
+    if (user !== undefined) {
+      try {
+        const userDocSnap = await getDoc(doc(db, "users", user.uid));
+        const patientDocSnap = await getDoc(doc(db, "patients", user.uid));
+
+        if (userDocSnap.exists()) {
+          userData = { ...userDocSnap.data() };
+        }
+
+        if (patientDocSnap.exists()) {
+          userData = { ...patientDocSnap.data() };
+        }
+
+        setFetchedList(userData);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
 
   const isInvalidInput = (attribute) => {
     switch (attribute) {
@@ -166,13 +193,41 @@ const RenderChangePassword = ({
 
   const handleLogin = async (e) => {
     // setTimeout(() => setLoadingData(true), 1);
+    let password = fetchedList["password"];
 
     if (oldPassword === password) {
-      await updatePassword(currentUser, newPassword)
+      await updatePassword(auth.currentUser, newPassword)
         .then(() => {
+          switch (fetchedList["role"]) {
+            case "patient":
+              updateDoc(doc(db, "patients", currentUser.uid), {
+                password: newPassword,
+              }).then(() => {
+                window.location.reload();
+              });
+              break;
+
+            case "nurse":
+              updateDoc(doc(db, "users", currentUser.uid), {
+                password: newPassword,
+              }).then(() => {
+                window.location.reload();
+              });
+              break;
+
+            case "doctor":
+              updateDoc(doc(db, "users", currentUser.uid), {
+                password: newPassword,
+              }).then(() => {
+                window.location.reload();
+              });
+              break;
+
+            default:
+              break;
+          }
+
           alert("Password changed successfuly!");
-          setPassword(newPassword);
-          onClose();
         })
         .catch((error) => {
           alert("ERROR 404. The server went down!");

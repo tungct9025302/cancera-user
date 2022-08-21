@@ -230,11 +230,11 @@ const DialogBox = (props) => {
 
       <Flex direction="column" spacing={8} align="left">
         {props.role === "admin"
-          ? adminDialogBoxTitles.map((name) => {
-              return <Dialog key={name} boxTitle={name} />;
+          ? adminDialogBoxTitles.map((name, index) => {
+              return <Dialog key={index} boxTitle={name} />;
             })
-          : userDialogBoxTitles.map((name) => {
-              return <Dialog key={name} boxTitle={name} />;
+          : userDialogBoxTitles.map((name, index) => {
+              return <Dialog key={index} boxTitle={name} />;
             })}
       </Flex>
     </Flex>

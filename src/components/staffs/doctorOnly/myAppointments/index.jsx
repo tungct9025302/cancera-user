@@ -45,8 +45,9 @@ import { async } from "@firebase/util";
 import { isEmptyArray } from "formik";
 import SpinnerComponent from "../../../commons/Spinner";
 
-const MyAppointment = () => {
+const MyAppointments = () => {
   const [date, setDate] = useState("");
+  const [name, setName] = useState("");
   const [deletedAppointment, setDeletedAppointment] = useState();
   const [patientDataOfDeletedAppointment, setPatientDataOfDeletedAppointment] =
     useState();
@@ -62,8 +63,8 @@ const MyAppointment = () => {
   useEffect(() => {
     fetchData();
     return () => {
-      setAllPatients([]);
-      setFetchedList([]);
+      setDate("");
+      setName("");
     };
   }, []);
 
@@ -72,25 +73,25 @@ const MyAppointment = () => {
     let patientsData = [];
     let userData = [];
 
-    try {
-      //get user data
-      const docSnap = await getDoc(doc(db, "users", currentUser.uid));
-      if (docSnap.exists()) {
-        userData = { ...docSnap.data() };
-      }
-      if (userData["my patients"] !== undefined) {
-        setMyPatients(userData["my patients"]);
-      }
-      setFetchedList(userData);
-      //get all patients
-      const querySnapshot = await getDocs(collection(db, "patients"));
-      querySnapshot.forEach((doc) => {
-        patientsData.push({ id: doc.id, ...doc.data() });
-      });
-      setAllPatients(patientsData);
-    } catch (err) {
-      console.log(err);
+    // try {
+    //   //get user data
+    const docSnap = await getDoc(doc(db, "users", currentUser.uid));
+    if (docSnap.exists()) {
+      userData = { ...docSnap.data() };
     }
+    if (userData["my patients"] !== undefined) {
+      setMyPatients(userData["my patients"]);
+    }
+    setFetchedList(userData);
+    //get all patients
+    const querySnapshot = await getDocs(collection(db, "patients"));
+    querySnapshot.forEach((doc) => {
+      patientsData.push({ id: doc.id, ...doc.data() });
+    });
+    setAllPatients(patientsData);
+    // } catch (err) {
+    //   console.log(err);
+    // }
   };
 
   const handleDelete = async (e) => {
@@ -211,78 +212,156 @@ const MyAppointment = () => {
 
   const renderFilteredAppointmentHistory = () => {
     let myAppointmentID = -1;
-    return fetchedList["my patients"].map((my_patient) => {
-      return allPatients.map((patient, index) => {
-        return patient["pid"] === my_patient["pid"]
-          ? patient["appointments"] !== undefined &&
-            !isEmptyArray(patient["appointments"])
-            ? patient["appointments"].map((appointment) => {
-                myAppointmentID = myAppointmentID + 1;
-                return appointment["date"] === date ? (
-                  <Box
-                    key={index}
-                    display={
-                      patient["appointments"] !== undefined &&
-                      !isEmptyArray(patient["appointments"])
-                        ? "block"
-                        : "unset"
-                    }
-                    mb={
-                      index + 1 === fetchedList["my patients"].length
-                        ? "0px"
-                        : "40px"
-                    }
-                  >
-                    {renderData(appointment, myAppointmentID, index, patient)}
-                  </Box>
-                ) : null;
-              })
-            : null
-          : null;
+
+    if (fetchedList["my patients"] !== undefined) {
+      return allPatients.map((patient) => {
+        return fetchedList["my patients"].map((my_patient, index) => {
+          return patient["pid"] === my_patient["pid"] ? (
+            <Box mb={patient["pid"] !== my_patient["pid"] ? "0px" : "40px"}>
+              {patient["appointments"] !== undefined &&
+              !isEmptyArray(patient["appointments"])
+                ? name === ""
+                  ? patient["appointments"].map((appointment) => {
+                      myAppointmentID = myAppointmentID + 1;
+                      return appointment["date"] === date ? (
+                        <Box
+                          key={myAppointmentID}
+                          display={
+                            patient["appointments"] !== undefined &&
+                            !isEmptyArray(patient["appointments"])
+                              ? "block"
+                              : "unset"
+                          }
+                        >
+                          {renderData(
+                            appointment,
+                            myAppointmentID,
+                            index,
+                            patient
+                          )}
+                        </Box>
+                      ) : null;
+                    })
+                  : patient["name"].toLowerCase().includes(name.toLowerCase())
+                  ? date !== ""
+                    ? patient["appointments"].map((appointment) => {
+                        myAppointmentID = myAppointmentID + 1;
+                        return appointment["date"] === date ? (
+                          <Box
+                            key={myAppointmentID}
+                            display={
+                              patient["appointments"] !== undefined &&
+                              !isEmptyArray(patient["appointments"])
+                                ? "block"
+                                : "unset"
+                            }
+                          >
+                            {renderData(
+                              appointment,
+                              myAppointmentID,
+                              index,
+                              patient
+                            )}
+                          </Box>
+                        ) : null;
+                      })
+                    : patient["appointments"].map((appointment) => {
+                        myAppointmentID = myAppointmentID + 1;
+                        return (
+                          <Box
+                            key={myAppointmentID}
+                            display={
+                              patient["appointments"] !== undefined &&
+                              !isEmptyArray(patient["appointments"])
+                                ? "block"
+                                : "unset"
+                            }
+                            // mb={
+                            //   patient["pid"] !== my_patient["pid"]
+                            //     ? "0px"
+                            //     : "40px"
+                            // }
+                          >
+                            {renderData(
+                              appointment,
+                              myAppointmentID,
+                              index,
+                              patient
+                            )}
+                          </Box>
+                        );
+                      })
+                  : null
+                : null}
+            </Box>
+          ) : null;
+        });
       });
-    });
+    } else {
+      return null;
+    }
   };
+
+  //   patient["appointments"].map((appointment) => {
+  //     myAppointmentID = myAppointmentID + 1;
+  //     return appointment["date"] === date ? (
+  //       <Box
+  //         key={index}
+  //         display={
+  //           patient["appointments"] !== undefined &&
+  //           !isEmptyArray(patient["appointments"])
+  //             ? "block"
+  //             : "unset"
+  //         }
+  //         mb={patient["pid"] !== my_patient["pid"] ? "0px" : "40px"}
+  //       >
+  //         {renderData(appointment, myAppointmentID, index, patient)}
+  //       </Box>
+  //     ) : null;
+  //   })
+  // : null
 
   const renderAllAppointmentHistory = () => {
     let myAppointmentID = -1;
-
-    return fetchedList["my patients"].map((my_patient) => {
-      return allPatients.map((patient, index) => {
-        return (
-          <Box
-            key={index}
-            display={
-              patient["appointments"] !== undefined &&
-              !isEmptyArray(patient["appointments"])
-                ? "block"
-                : "unset"
-            }
-            mb={
-              index + 1 === fetchedList["my patients"].length ? "0px" : "40px"
-            }
-          >
-            {patient["pid"] === my_patient["pid"]
-              ? patient["appointments"] !== undefined &&
+    if (fetchedList["my patients"] !== undefined) {
+      return allPatients.map((patient) => {
+        return fetchedList["my patients"].map((my_patient, index) => {
+          return (
+            <Box
+              key={index}
+              display={
+                patient["appointments"] !== undefined &&
                 !isEmptyArray(patient["appointments"])
-                ? patient["appointments"].map((appointment, index) => {
-                    myAppointmentID = myAppointmentID + 1;
-                    return (
-                      <Box key={index}>
-                        {renderData(
-                          appointment,
-                          myAppointmentID,
-                          index,
-                          patient
-                        )}
-                      </Box>
-                    );
-                  })
-                : null
-              : null}
-          </Box>
-        );
+                  ? "block"
+                  : "unset"
+              }
+              mb={patient["pid"] !== my_patient["pid"] ? "0px" : "40px"}
+            >
+              {patient["pid"] === my_patient["pid"]
+                ? patient["appointments"] !== undefined &&
+                  !isEmptyArray(patient["appointments"])
+                  ? patient["appointments"].map((appointment, index) => {
+                      myAppointmentID = myAppointmentID + 1;
+                      return (
+                        <Box key={index}>
+                          {renderData(
+                            appointment,
+                            myAppointmentID,
+                            index,
+                            patient
+                          )}
+                        </Box>
+                      );
+                    })
+                  : null
+                : null}
+            </Box>
+          );
+        });
       });
-    });
+    } else {
+      return null;
+    }
   };
 
   const renderData = (appointment, myAppointmentID, index, patient) => {
@@ -353,7 +432,7 @@ const MyAppointment = () => {
               isTruncated
               textAlign="center"
             >
-              Name: {patient["patient name"]}
+              Name: {patient["name"]}
             </Box>
             <Box
               color="blue.600"
@@ -400,11 +479,11 @@ const MyAppointment = () => {
                   <Link
                     to={`/modify/pid=${patient["pid"]}/appointment/id=${index}`}
                     state={{
-                      name: patient["patient name"],
+                      name: patient["name"],
                       id: index,
                       pid: patient["pid"],
-                      boxTitle: "appointment",
-                      previous_location: "my appointment",
+                      boxTitle: "appointments",
+                      previous_location: "my appointments",
                     }}
                   >
                     <Icon
@@ -441,19 +520,21 @@ const MyAppointment = () => {
 
   const renderEndMessage = () => {
     let not_exist = true;
+    if (fetchedList["my patients"] !== undefined) {
+      fetchedList["my patients"].map((my_patient) => {
+        allPatients
+          .filter((patient) => patient["pid"] === my_patient["pid"])
+          .map((foundPatient) => {
+            if (
+              foundPatient["appointments"] !== undefined &&
+              !isEmptyArray(foundPatient["appointments"])
+            ) {
+              not_exist = false;
+            }
+          });
+      });
+    }
 
-    fetchedList["my patients"].map((my_patient) => {
-      allPatients
-        .filter((patient) => patient["pid"] === my_patient["pid"])
-        .map((foundPatient) => {
-          if (
-            foundPatient["appointments"] !== undefined &&
-            !isEmptyArray(foundPatient["appointments"])
-          ) {
-            not_exist = false;
-          }
-        });
-    });
     return not_exist ? "You do not have any appointments..." : null;
   };
 
@@ -471,20 +552,39 @@ const MyAppointment = () => {
           My Appointments
         </Text>
         <Flex direction="column" m="0 5% 0 5%">
-          <Flex direction="row" mb="10px" align="center">
-            <Text fontWeight="600" mr="5px" whiteSpace="nowrap">
-              Search by date:
-            </Text>
-            <FormControl w="160px">
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => {
-                  setDate(e.target.value);
-                }}
-              />
-            </FormControl>
+          <Flex direction="row" justifyContent="space-between" mb="10px">
+            <Flex direction="row" align="center">
+              <Text fontWeight="600" mr="5px" whiteSpace="nowrap">
+                Search by date:
+              </Text>
+              <FormControl w="160px">
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                  }}
+                />
+              </FormControl>
+            </Flex>
+
+            <Flex direction="row" align="center">
+              <Text fontWeight="600" mr="5px" whiteSpace="nowrap">
+                Search by patient name:
+              </Text>
+              <FormControl w="160px">
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
+                  placeholder="Nguyen Van A"
+                />
+              </FormControl>
+            </Flex>
           </Flex>
 
           <InfiniteScroll
@@ -498,7 +598,7 @@ const MyAppointment = () => {
               </Text>
             }
           >
-            {date === ""
+            {date === "" && name === ""
               ? renderAllAppointmentHistory()
               : renderFilteredAppointmentHistory()}
           </InfiniteScroll>
@@ -512,4 +612,4 @@ const MyAppointment = () => {
   );
 };
 
-export default MyAppointment;
+export default MyAppointments;

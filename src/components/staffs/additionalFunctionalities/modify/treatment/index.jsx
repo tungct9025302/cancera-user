@@ -24,7 +24,6 @@ import {
 import { Formik, Form, Field } from "formik";
 import { StarIcon, EditIcon } from "@chakra-ui/icons";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { connect } from "react-redux";
 
 import DialogBox from "../../../../commons/DialogBox";
 import {
@@ -43,13 +42,13 @@ import { auth, db } from "../../../../../database/firebaseConfigs";
 import { AuthContext } from "../../../../context/AuthContext";
 import { treatmentInputs } from "../../../../commons/FormSource";
 import { isEmptyArray } from "formik";
+import SpinnerComponent from "../../../../commons/Spinner";
 
 const ModifyTreatment = () => {
   const [date, setDate] = useState("");
   const [duration, setDuration] = useState("");
   const [length, setLength] = useState("");
-  const [treatment, setTreatment] = useState("");
-  const [note, setNote] = useState("");
+  const [treatmentType, setTreatmentType] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -61,9 +60,8 @@ const ModifyTreatment = () => {
   const [allPatients, setAllPatients] = useState([]);
 
   let properties = {
-    length: ["", "day(s)", "week(s)", "month(s)", "year(s)"],
-    treatments: [
-      "",
+    length: ["day(s)", "week(s)", "month(s)", "year(s)"],
+    ["treatment types"]: [
       "Surgery",
       "Chemotherapy",
       "Radiation therapy",
@@ -85,16 +83,16 @@ const ModifyTreatment = () => {
 
   //database
   const fetchData = async () => {
-    let patientData,
-      userData = [];
+    let patientsData = [];
+    let userData = [];
+
     try {
-      const allPatientsDocSnap = await getDoc(
-        doc(db, "patients", "j1g1lxEY9vBDbk2PrQiy")
-      );
-      if (allPatientsDocSnap.exists()) {
-        patientData = { ...allPatientsDocSnap.data() };
-        setAllPatients(patientData["allPatients"]);
-      }
+      //get all patients
+      const querySnapshot = await getDocs(collection(db, "patients"));
+      querySnapshot.forEach((doc) => {
+        patientsData.push({ id: doc.id, ...doc.data() });
+      });
+      setAllPatients(patientsData);
 
       //get user data
       const userDocSnap = await getDoc(doc(db, "users", currentUser.uid));
@@ -104,29 +102,34 @@ const ModifyTreatment = () => {
       }
 
       //set current patient
-      if (!isEmptyArray(patientData)) {
-        for (let i = 0; i < patientData["allPatients"].length; i++) {
+      if (!isEmptyArray(patientsData)) {
+        for (let i = 0; i < patientsData.length; i++) {
           if (
-            (pid === patientData["allPatients"][i].pid && pid !== undefined) ||
-            patientData["allPatients"][i].pid === pid
+            (pid === patientsData[i].pid && pid !== undefined) ||
+            patientsData[i].pid === pid
           ) {
-            setCurrentPatient(patientData["allPatients"][i]);
+            setCurrentPatient(patientsData[i]);
           }
         }
       }
 
-      if (!isEmptyArray(patientData["allPatients"])) {
-        for (let i = 0; i < patientData["allPatients"].length; i++) {
-          if (pid === patientData["allPatients"][i].pid && pid !== undefined) {
-            setCurrentPatient(patientData["allPatients"][i]);
-            patientData["allPatients"][i]["treatments"].map(
-              (treatment, index) => {
-                if (id === index) {
-                  setDisplayInfo(treatment);
-                  setInitializeData(treatment);
-                }
+      if (!isEmptyArray(patientsData)) {
+        for (let i = 0; i < patientsData.length; i++) {
+          if (pid === patientsData[i]["pid"] && pid !== undefined) {
+            setCurrentPatient(patientsData[i]);
+            patientsData[i]["treatments"].map((treatment, index) => {
+              if (id === index) {
+                setDisplayInfo(treatment);
+                setInitializeData(treatment);
+                setData({
+                  ["creator name"]: userData["name"],
+                  ["creator id"]: userData["id"],
+                  date: treatment["date"],
+                  duration: treatment["duration"],
+                  ["treatment type"]: treatment["treatment type"],
+                });
               }
-            );
+            });
           }
         }
       }
@@ -144,11 +147,9 @@ const ModifyTreatment = () => {
       list = { ...list, duration: treatment["duration"] };
     }
     if (treatment["treatment"] !== undefined) {
-      list = { ...list, treatment: treatment["treatment"] };
+      list = { ...list, ["treatment type"]: treatment["treatment type"] };
     }
-    if (treatment["note"] !== undefined) {
-      list = { ...list, note: treatment["note"] };
-    }
+
     setData(list);
   };
 
@@ -162,19 +163,9 @@ const ModifyTreatment = () => {
           setLength(data["duration"].replace(/[^A-Za-z()]/g, ""));
           setDuration(data["duration"].match(/\d/g).join(""));
           break;
-        case "treatment":
-          setTreatment(data["treatment"]);
+        case "treatment type":
+          setTreatmentType(data["treatment type"]);
           break;
-        case "note":
-          if (data["note"] !== undefined) {
-            setNote(data["note"]);
-            break;
-          } else {
-            data["note"] = "";
-            setNote(data["note"]);
-            break;
-          }
-
         default:
           break;
       }
@@ -184,42 +175,30 @@ const ModifyTreatment = () => {
   const handleModify = async (e) => {
     e.preventDefault();
 
-    let newAllPatients = [];
-
-    allPatients.map((patient) => {
-      if (patient["pid"] === pid) {
-        if (
-          patient["treatments"] !== undefined ||
-          !isEmptyArray(patient["treatments"])
-        ) {
-          let newTreatments = [];
-
-          patient["treatments"].map((treatment, index) => {
-            if (index === id) {
-              treatment = { ...data };
-            }
-            newTreatments.push(treatment);
-          });
-
-          patient = {
-            ...patient,
-            treatments: newTreatments,
-          };
+    let newTreatments = [];
+    if (
+      currentPatient["treatments"] !== undefined ||
+      !isEmptyArray(currentPatient["treatments"])
+    ) {
+      currentPatient["treatments"].map((treatment, index) => {
+        if (index === id) {
+          treatment = { ...data };
         }
-      }
-      newAllPatients.push(patient);
-    });
+        newTreatments.push(treatment);
+      });
+    }
 
     try {
       if (
         currentPatient["treatments"] !== undefined &&
         !isEmptyArray(currentPatient["treatments"])
       ) {
-        await setDoc(doc(db, "patients", "j1g1lxEY9vBDbk2PrQiy"), {
-          allPatients: newAllPatients,
+        await updateDoc(doc(db, "patients", currentPatient["id"]), {
+          treatments: newTreatments,
         });
+
         navigate(
-          `/search-patient/id=${pid}/check-history/general examination`,
+          `/search-patient/id=${pid}/check-history/general-examinations`,
           {
             state: { boxTitle: boxTitle, name: name, pid: pid },
           }
@@ -232,7 +211,7 @@ const ModifyTreatment = () => {
       console.log(err);
     }
   };
-
+  console.log(data);
   const handleInput = (e) => {
     const id = e.target.id;
     const value = e.target.value;
@@ -240,7 +219,7 @@ const ModifyTreatment = () => {
       case "date":
         setData({ ...data, [id]: value });
         break;
-      case "treatment":
+      case "type":
         setData({ ...data, [id]: value });
         break;
       case "length":
@@ -282,7 +261,7 @@ const ModifyTreatment = () => {
     return (
       !isError(date, "date") &&
       !isInFuture(date) &&
-      !isError(treatment, "treatment") &&
+      !isError(treatmentType, "treatment type") &&
       !isError(duration, "duration") &&
       !isError(length, "length")
     );
@@ -305,13 +284,20 @@ const ModifyTreatment = () => {
 
   const isError = (value, attribute) => {
     switch (attribute) {
+      case "name":
+        return false;
+      case "creator name":
+        return false;
+      case "creator id":
+        return false;
+
       case "date":
         if (value === "") {
           return true;
         }
         return false;
 
-      case "treatment":
+      case "treatment type":
         if (value === "") {
           return true;
         }
@@ -333,25 +319,33 @@ const ModifyTreatment = () => {
 
   const findValue = (key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         return name;
+      case "creator name":
+        return fetchedList["name"];
+      case "creator id":
+        return fetchedList["id"];
       case "length":
         return length;
       case "date":
         return date;
-      case "treatment":
-        return treatment;
+      case "treatment type":
+        return treatmentType;
       case "duration":
         return duration;
-      case "note":
-        return note;
+
       default:
         return null;
     }
   };
+
   const handleSet = (value, key) => {
     switch (key) {
-      case "patient name":
+      case "name":
+        break;
+      case "creator name":
+        break;
+      case "creator id":
         break;
       case "length":
         setLength(value);
@@ -359,20 +353,18 @@ const ModifyTreatment = () => {
       case "date":
         setDate(value);
         break;
-      case "treatment":
-        setTreatment(value);
+      case "treatment type":
+        setTreatmentType(value);
         break;
       case "duration":
         setDuration(value);
         break;
-      case "note":
-        setNote(value);
-        break;
+
       default:
         break;
     }
   };
-  return (
+  return fetchedList["name"] !== undefined ? (
     <Flex direction="row" minH="78vh" w="100%" p="0 12% 5% 12%" h="max-content">
       <DialogBox
         name={name}
@@ -412,7 +404,11 @@ const ModifyTreatment = () => {
                 <FormLabel>{input["label"]}</FormLabel>
                 <InputGroup>
                   <Input
-                    readOnly={input["id"] === "patient name"}
+                    readOnly={
+                      input["id"] === "name" ||
+                      input["id"] === "creator id" ||
+                      input["id"] === "creator name"
+                    }
                     pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"
                     type={input["type"]}
                     value={findValue(input["id"])}
@@ -497,12 +493,8 @@ const ModifyTreatment = () => {
       </Box>
       <Box minW="18%"></Box>
     </Flex>
+  ) : (
+    <SpinnerComponent></SpinnerComponent>
   );
 };
-const mapDispatchToProps = (dispatch) => {
-  return {
-    modifyPatientTreatmentById: (pid, treatmentID, modifiedData) =>
-      dispatch(modifyPatientTreatmentById(pid, treatmentID, modifiedData)),
-  };
-};
-export default connect(null, mapDispatchToProps)(ModifyTreatment);
+export default ModifyTreatment;

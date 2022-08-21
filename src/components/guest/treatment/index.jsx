@@ -62,17 +62,15 @@ const Treatment = () => {
 
   //database
   const fetchData = async () => {
-    let list = {};
-
+    let list = [];
     try {
       //get cancer data
-      const treatmentDocSnap = await getDoc(
-        doc(db, "guests", "q6hUkmJo4Nq6Laaqtt5q")
-      );
-      if (treatmentDocSnap.exists()) {
-        list = { ...treatmentDocSnap.data() };
-        setFetchedTreatmentList(list["treatment data"]);
-      }
+      const querySnapshot = await getDocs(collection(db, "treatments"));
+      querySnapshot.forEach((doc) => {
+        list.push({ id: doc.id, ...doc.data() });
+      });
+
+      setFetchedTreatmentList(list);
     } catch (err) {
       console.log(err);
     }
@@ -82,7 +80,7 @@ const Treatment = () => {
     const searchWord = event.target.value;
     setWordEntered(searchWord);
     const newFilter = fetchedTreatmentList.filter((value) => {
-      return value.name.toLowerCase().includes(searchWord.toLowerCase());
+      return value["type"].toLowerCase().includes(searchWord.toLowerCase());
     });
 
     if (searchWord === "") {
@@ -103,7 +101,7 @@ const Treatment = () => {
           mr="20px"
         >
           <Flex direction="column">
-            <Link to={`/search/treatment/${treatment.name.toLowerCase()}`}>
+            <Link to={`/search/treatment/${treatment["type"].toLowerCase()}`}>
               <Text
                 color="#034254"
                 display="block"
@@ -114,7 +112,7 @@ const Treatment = () => {
                 textDecor="none"
                 textTransform="capitalize"
               >
-                {treatment.name}
+                {treatment["type"]}
               </Text>
             </Link>
 
@@ -124,7 +122,12 @@ const Treatment = () => {
               fontSize="15px"
               textDecor="underline"
             >
-              {treatment["treatment type"]}
+              {treatment["treatment forms"].map((form, index) => {
+                return index + 1 === treatment["treatment forms"].length
+                  ? `${form} `
+                  : `${form}/`;
+              })}
+              treatment
             </Text>
           </Flex>
         </ListItem>
@@ -138,7 +141,7 @@ const Treatment = () => {
         <ListItem
           key={index}
           display={
-            treatment["name"].charAt(0).toLowerCase() === alphabet
+            treatment["type"].charAt(0).toLowerCase() === alphabet
               ? "inline-block"
               : "none"
           }
@@ -148,7 +151,7 @@ const Treatment = () => {
         >
           <Flex direction="column">
             <Link
-              to={`/search/treatment/${treatment["name"].toLowerCase()}`}
+              to={`/search/treatment/${treatment["type"].toLowerCase()}`}
               state={{ dataType: "TreatmentData", id: treatment["id"] }}
             >
               <Text
@@ -162,7 +165,7 @@ const Treatment = () => {
                 textTransform="capitalize"
                 textAlign="left"
               >
-                {treatment["name"]}
+                {treatment["type"]}
               </Text>
             </Link>
           </Flex>

@@ -235,7 +235,7 @@ const AddGeneralExamination = () => {
 
   const isError = (value, attribute) => {
     switch (attribute) {
-      case "patient name":
+      case "name":
         return false;
       case "creator name":
         return false;
@@ -278,7 +278,7 @@ const AddGeneralExamination = () => {
   };
   const findValue = (key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         return name;
       case "creator name":
         return fetchedList["name"];
@@ -302,7 +302,7 @@ const AddGeneralExamination = () => {
   };
   const handleSet = (value, key) => {
     switch (key) {
-      case "patient name":
+      case "name":
         break;
       case "creator name":
         break;
@@ -331,7 +331,7 @@ const AddGeneralExamination = () => {
     }
   };
   return fetchedList["role"] !== undefined ? (
-    <Flex direction="row" minH="78vh" w="100%" p="0 12% 5% 12%" h="max-content">
+    <Flex direction="row" minH="78vh" w="100%" p="0 12% 0% 12%" h="max-content">
       <DialogBox
         name={name}
         pid={pid}
@@ -371,7 +371,7 @@ const AddGeneralExamination = () => {
                 <InputGroup size="md">
                   <Input
                     readOnly={
-                      input["id"] === "patient name" ||
+                      input["id"] === "name" ||
                       input["id"] === "creator name" ||
                       input["id"] === "creator id"
                     }
@@ -441,6 +441,7 @@ const AddGeneralExamination = () => {
             _focus={{ shadow: "" }}
             fontWeight="md"
             mt="20px"
+            style={!checkAllValid() ? { pointerEvents: "none" } : null}
           >
             Save
           </Button>

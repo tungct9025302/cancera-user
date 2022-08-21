@@ -265,24 +265,24 @@ const ViewMyTreatments = () => {
             );
           })}
 
-          <Flex direction="row" mt="2px">
-            <Icon as={FaUserMd} w={4} h={4} m="2px 2px 0 0" />
-            <Text>Doctor: {treatment["doctor name"]}</Text>
-          </Flex>
-
           <Flex
             direction="row"
             alignItems="center"
             justifyContent="space-between"
             mt="2px"
           >
+            <Flex direction="row" mt="2px">
+              <Icon as={FaUserMd} w={4} h={4} m="2px 2px 0 0" />
+              <Text>Creator: {treatment["creator name"]}</Text>
+            </Flex>
+
             <Flex direction="row">
               <Flex>
-                <Text>Doctor ID:</Text>
+                <Text>Creator ID:</Text>
               </Flex>
               <Box maxW="500px">
                 <Text ml="1px" fontStyle="italic">
-                  {treatment["doctor id"]}
+                  {treatment["creator id"]}
                 </Text>
               </Box>
             </Flex>
@@ -293,7 +293,7 @@ const ViewMyTreatments = () => {
   };
   const renderEndMessage = () => {
     let exist;
-    if (fetchedList !== undefined) {
+    if (fetchedList["treatments"] !== undefined) {
       fetchedList["treatments"].map((treatment, index) => {
         if (treatment["date"] === date) {
           exist = true;
@@ -317,7 +317,7 @@ const ViewMyTreatments = () => {
 
   return fetchedList["pid"] !== undefined ? (
     <Flex direction="row" w="100%" p="0 12%">
-      <DialogBox boxTitle="treatment" role={fetchedList["role"]} />
+      <DialogBox boxTitle="treatments" role={fetchedList["role"]} />
 
       <Box minW="600px" w="100%" p="0 2% 0 2%">
         <Text

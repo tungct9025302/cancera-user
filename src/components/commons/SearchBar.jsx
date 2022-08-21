@@ -31,11 +31,11 @@ const SearchBar = ({
       case "treatment":
         return (
           <Link
-            to={`/search/treatment/${value["name"].toLowerCase()}`}
+            to={`/search/treatment/${value["type"].toLowerCase()}`}
             state={{ dataType: type, id: value["id"] }}
           >
             <Text fontSize="1.5em" fontWeight="500">
-              {value.name}
+              {value["type"]}
             </Text>
           </Link>
         );
@@ -50,7 +50,7 @@ const SearchBar = ({
           >
             <Flex direction="row" justifyContent="space-between">
               <Text fontSize="1.5em" fontWeight="500">
-                {value["patient name"]}
+                {value["name"]}
               </Text>
               <Text fontSize="1.5em" fontWeight="500">
                 {value["pid"]}

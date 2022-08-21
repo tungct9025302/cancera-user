@@ -60,7 +60,7 @@ const CheckTreatment = () => {
 
   let attributes = [
     {
-      id: "treatment",
+      id: "treatment type",
     },
     {
       id: "duration",
@@ -69,7 +69,7 @@ const CheckTreatment = () => {
 
   useEffect(() => {
     fetchData();
-
+    // getLastestTreatment();
     return () => {
       setCurrentPatient({});
       setFetchedList([]);
@@ -393,7 +393,7 @@ const CheckTreatment = () => {
     }
   };
 
-  return currentPatient !== undefined ? (
+  return currentPatient["pid"] !== undefined ? (
     <Flex direction="row" w="100%" p="0 12%">
       <DialogBox
         name={name}
