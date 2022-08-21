@@ -37,7 +37,7 @@
 - Techstacks:
     - React (ChakraUI, Vitejs)
     - Nodejs
-    - Firestore database
+    - Firestore database 
     
 - Provided patient account:
     - Username: huynhduckhai@yahoo.com
