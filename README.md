@@ -29,7 +29,7 @@
         - Search a cancer
     
     - Nurse features (sign in required)
-        - The same with doctor but exclude manage my appointments and manage patient appointment
+        - The same with doctor excluding manage my appointments and manage patient appointment
         
     - Patient features (sign in required)
         - View my appointment, general examination, treatment records
