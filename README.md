@@ -7,11 +7,13 @@
 - Web application for medical facilities to manage cancer patients & their related information (including 3 records: appointment, general examination, treatment).
 - Features:
       - Common features (for all users that has signed in with an account)
-       - View profile
-       - Change password
-       - User Login / Logout (initialize project and access website http://localhost:3000)
+       - Search by an indicator
+        - Search a cancer
+        - Search a treatment
+
         
     - Guest features (no sign in required)
+       
         - Search by an indicator
         - Search a cancer
         - Search a treatment
